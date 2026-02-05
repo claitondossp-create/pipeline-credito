@@ -35,10 +35,10 @@ def convert_days_to_date(days):
     except:
         return None
 
-print("🚀 Gerando CSV formatado para COPY do PostgreSQL\n")
+print("Gerando CSV formatado para COPY do PostgreSQL\n")
 
 # Processar application_data
-print("📊 Processando application_data.csv...")
+print("Processando application_data.csv...")
 df_app = pd.read_csv('application_data.csv')
 
 # Criar colunas calculadas
@@ -72,10 +72,10 @@ df_output = pd.DataFrame({
 
 # Salvar CSV formatado
 df_output.to_csv('scripts/application_data_formatted.csv', index=False, encoding='utf-8')
-print(f"✅ Gerado: application_data_formatted.csv ({len(df_output)} registros)\n")
+print(f"OK Gerado: application_data_formatted.csv ({len(df_output)} registros)\n")
 
 # Processar previous_application
-print("📊 Processando previous_application.csv...")
+print("Processando previous_application.csv...")
 df_prev = pd.read_csv('previous_application.csv')
 
 df_prev['data_decisao'] = df_prev['DAYS_DECISION'].apply(convert_days_to_date)
@@ -96,7 +96,7 @@ df_prev_output = pd.DataFrame({
 })
 
 df_prev_output.to_csv('scripts/previous_application_formatted.csv', index=False, encoding='utf-8')
-print(f"✅ Gerado: previous_application_formatted.csv ({len(df_prev_output)} registros)\n")
+print(f"OK Gerado: previous_application_formatted.csv ({len(df_prev_output)} registros)\n")
 
 # Gerar comandos SQL COPY
 print("=" * 60)
