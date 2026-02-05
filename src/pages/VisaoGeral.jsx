@@ -57,8 +57,26 @@ export default function VisaoGeral() {
       >
         {/* Period Toggle */}
         <div className="flex items-center bg-brand-dark/40 border border-brand-bright/20 rounded-lg p-1">
-          <button className="px-4 py-1.5 text-[10px] font-extrabold rounded bg-brand-bright text-black">MENSAL</button>
-          <button className="px-4 py-1.5 text-[10px] font-bold text-brand-bright/70 hover:text-white">ANUAL</button>
+          <button 
+            onClick={() => updateFilter('period', 'mensal')}
+            className={`px-4 py-1.5 text-[10px] font-extrabold rounded transition-all ${
+              filters.period === 'mensal' 
+                ? 'bg-brand-bright text-black' 
+                : 'text-brand-bright/70 hover:text-white'
+            }`}
+          >
+            MENSAL
+          </button>
+          <button 
+            onClick={() => updateFilter('period', 'anual')}
+            className={`px-4 py-1.5 text-[10px] font-bold transition-all ${
+              filters.period === 'anual' 
+                ? 'bg-brand-bright text-black rounded' 
+                : 'text-brand-bright/70 hover:text-white'
+            }`}
+          >
+            ANUAL
+          </button>
         </div>
       </Header>
 
@@ -197,10 +215,23 @@ export default function VisaoGeral() {
               <p className="text-[11px] font-medium text-brand-bright/60 uppercase tracking-widest">Volume por Tipo de Renda</p>
             </div>
             <div className="space-y-6">
-              <ProgressBar label="Assalariado" value={450} maxValue={600} displayValue="R$ 450M" />
-              <ProgressBar label="Autônomo" value={280} maxValue={600} displayValue="R$ 280M" opacity={0.8} />
-              <ProgressBar label="Empresário" value={510} maxValue={600} displayValue="R$ 510M" />
-              <ProgressBar label="Aposentado" value={218} maxValue={600} displayValue="R$ 218M" opacity={0.6} />
+              {data.volumePorRenda && data.volumePorRenda.length > 0 ? (
+                data.volumePorRenda.slice(0, 4).map((item, idx) => {
+                  const maxValue = data.volumePorRenda[0]?.value || 1
+                  return (
+                    <ProgressBar 
+                      key={item.label}
+                      label={item.label} 
+                      value={item.value} 
+                      maxValue={maxValue} 
+                      displayValue={formatCurrency(item.value)}
+                      opacity={1 - (idx * 0.15)}
+                    />
+                  )
+                })
+              ) : (
+                <p className="text-brand-bright/40 text-sm">Sem dados disponíveis</p>
+              )}
             </div>
           </div>
 
@@ -218,7 +249,11 @@ export default function VisaoGeral() {
                   <circle cx="50" cy="50" fill="none" r="40" stroke="#26A69A" strokeDasharray="66 251" strokeDashoffset="-187" strokeOpacity="0.3" strokeWidth="12"></circle>
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-white">22.4K</span>
+                  <span className="text-2xl font-black text-white">
+                    {data.totalContratos >= 1000 
+                      ? `${(data.totalContratos / 1000).toFixed(1)}K` 
+                      : data.totalContratos}
+                  </span>
                   <span className="text-[9px] font-bold text-brand-bright uppercase tracking-widest">Contratos</span>
                 </div>
               </div>

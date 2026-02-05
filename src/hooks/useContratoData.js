@@ -69,7 +69,10 @@ export const useContratoData = () => {
         ticketMedio: 0,
         taxaInadimplencia: 0,
         taxaEficiencia: 0,
-        contratos: []
+        contratos: [],
+        volumePorRenda: [],
+        volumePorGenero: { M: 0, F: 0 },
+        contratosPorMes: []
       }
     }
 
@@ -81,6 +84,37 @@ export const useContratoData = () => {
     const taxaInadimplencia = totalContratos > 0 ? (inadimplentes / totalContratos) * 100 : 0
     const taxaEficiencia = totalSolicitado > 0 ? (totalVolume / totalSolicitado) * 100 : 0
     
+    // Volume por tipo de renda
+    const rendaGroups = contratos.reduce((acc, c) => {
+      const tipo = c.tipo_renda || 'Não informado'
+      if (!acc[tipo]) acc[tipo] = 0
+      acc[tipo] += parseFloat(c.valor_concedido || 0)
+      return acc
+    }, {})
+    
+    const volumePorRenda = Object.entries(rendaGroups)
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+    
+    // Volume por gênero
+    const volumePorGenero = contratos.reduce((acc, c) => {
+      const genero = c.genero || 'Não informado'
+      acc[genero] = (acc[genero] || 0) + parseFloat(c.valor_concedido || 0)
+      return acc
+    }, {})
+    
+    // Contratos por mês (para gráfico de evolução)
+    const contratosPorMes = contratos.reduce((acc, c) => {
+      const data = new Date(c.data_contrato)
+      const mes = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`
+      if (!acc[mes]) {
+        acc[mes] = { mes, volume: 0, quantidade: 0 }
+      }
+      acc[mes].volume += parseFloat(c.valor_concedido || 0)
+      acc[mes].quantidade += 1
+      return acc
+    }, {})
+    
     return {
       totalVolume,
       totalSolicitado,
@@ -88,7 +122,10 @@ export const useContratoData = () => {
       ticketMedio,
       taxaInadimplencia,
       taxaEficiencia,
-      contratos
+      contratos,
+      volumePorRenda,
+      volumePorGenero,
+      contratosPorMes: Object.values(contratosPorMes).sort((a, b) => a.mes.localeCompare(b.mes))
     }
   }
 

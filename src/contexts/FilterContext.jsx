@@ -17,6 +17,7 @@ export const FilterProvider = ({ children }) => {
     gender: 'todos',
     contractType: 'todos',
     ageRange: 'todos',
+    period: 'mensal', // 'mensal' ou 'anual'
   })
 
   const updateFilter = (key, value) => {
@@ -30,6 +31,7 @@ export const FilterProvider = ({ children }) => {
       gender: 'todos',
       contractType: 'todos',
       ageRange: 'todos',
+      period: 'mensal',
     })
   }
 
