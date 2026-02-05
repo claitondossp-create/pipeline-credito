@@ -1,34 +1,18 @@
-import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
 
 const menuItems = [
-  { id: 'visao_geral', label: 'Visão Geral', icon: 'dashboard', path: '/dashboard' },
+  { id: 'visao_geral', label: 'Visão Geral', icon: 'dashboard', path: '/dashboard/visao-geral' },
   { id: 'credito_risco', label: 'Crédito & Risco', icon: 'analytics', path: '/dashboard/credito-risco' },
-  { id: 'financeiro', label: 'Financeiro', icon: 'account_balance_wallet', path: '/dashboard/financeiro' },
-  { id: 'juridico', label: 'Jurídico', icon: 'gavel', path: '/dashboard/juridico' },
-  { id: 'bi', label: 'Business Intelligence', icon: 'query_stats', path: '/dashboard/bi' },
-]
-
-const configItems = [
-  { id: 'parametros', label: 'Parâmetros', icon: 'settings', path: '/dashboard/parametros', adminOnly: true },
-  { id: 'usuarios', label: 'Usuários', icon: 'group', path: '/dashboard/usuarios', adminOnly: true },
-  { id: 'perfis', label: 'Perfis', icon: 'admin_panel_settings', path: '/dashboard/perfis', adminOnly: true },
+  { id: 'bi', label: 'Business Intelligence', icon: 'query_stats', path: '/dashboard/business-intelligence' },
+  { id: 'transacoes', label: 'Transações', icon: 'receipt_long', path: '/dashboard/transacoes' },
+  { id: 'alertas', label: 'Alertas', icon: 'notifications', path: '/dashboard/alertas' },
+  { id: 'relatorios', label: 'Relatórios', icon: 'description', path: '/dashboard/relatorios' },
 ]
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
-  const { profile, hasPermission, signOut } = useAuth()
 
   const isActive = (path) => location.pathname === path
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
-  }
 
   return (
     <>
@@ -67,93 +51,43 @@ export default function Sidebar({ isOpen, onClose }) {
 
         {/* Navigation */}
         <nav className="flex-1 px-4 space-y-2 mt-4 overflow-y-auto custom-scrollbar">
-          {menuItems.map((item) => {
-            const canView = hasPermission(item.id)
-            if (!canView && item.id !== 'visao_geral') return null
-
-            return (
-              <Link
-                key={item.id}
-                to={item.path}
-                onClick={onClose}
-                className={`
-                  flex items-center gap-3 px-4 py-3 rounded-lg transition-all group
-                  ${isActive(item.path) 
-                    ? 'bg-brand-bright/10 border border-brand-bright/30' 
-                    : 'hover:bg-brand-dark/30 border border-transparent'
-                  }
-                `}
-              >
-                <span className={`material-symbols-outlined ${isActive(item.path) ? 'text-brand-bright' : 'text-gray-500 group-hover:text-brand-bright'}`}>
-                  {item.icon}
-                </span>
-                <span className={`text-sm ${isActive(item.path) ? 'font-bold text-white' : 'font-medium text-gray-400 group-hover:text-white'}`}>
-                  {item.label}
-                </span>
-              </Link>
-            )
-          })}
-
-          {/* Config Section - Admin Only */}
-          {profile?.perfil_tipo === 'admin' && (
-            <>
-              <div className="pt-6 pb-2 px-4">
-                <p className="text-[9px] text-gray-600 font-bold uppercase tracking-[0.2em]">Configurações</p>
-              </div>
-              {configItems.map((item) => (
-                <Link
-                  key={item.id}
-                  to={item.path}
-                  onClick={onClose}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all group
-                    ${isActive(item.path) 
-                      ? 'bg-brand-bright/10 border border-brand-bright/30' 
-                      : 'hover:bg-brand-dark/30 border border-transparent'
-                    }
-                  `}
-                >
-                  <span className={`material-symbols-outlined ${isActive(item.path) ? 'text-brand-bright' : 'text-gray-500 group-hover:text-brand-bright'}`}>
-                    {item.icon}
-                  </span>
-                  <span className={`text-sm ${isActive(item.path) ? 'font-bold text-white' : 'font-medium text-gray-400 group-hover:text-white'}`}>
-                    {item.label}
-                  </span>
-                </Link>
-              ))}
-            </>
-          )}
+          {menuItems.map((item) => (
+            <Link
+              key={item.id}
+              to={item.path}
+              onClick={onClose}
+              className={`
+                flex items-center gap-3 px-4 py-3 rounded-lg transition-all group
+                ${isActive(item.path) 
+                  ? 'bg-brand-bright/10 border border-brand-bright/30' 
+                  : 'hover:bg-brand-dark/30 border border-transparent'
+                }
+              `}
+            >
+              <span className={`material-symbols-outlined ${isActive(item.path) ? 'text-brand-bright' : 'text-gray-500 group-hover:text-brand-bright'}`}>
+                {item.icon}
+              </span>
+              <span className={`text-sm ${isActive(item.path) ? 'font-bold text-white' : 'font-medium text-gray-400 group-hover:text-white'}`}>
+                {item.label}
+              </span>
+            </Link>
+          ))}
         </nav>
 
-        {/* User Profile */}
+        {/* Footer Info */}
         <div className="p-6 mt-auto border-t border-brand-bright/10">
           <div className="flex items-center gap-3 p-3 glassmorphism rounded-xl">
             <div className="w-10 h-10 rounded-full border border-brand-bright/30 p-0.5 shrink-0 bg-brand-dark flex items-center justify-center">
-              {profile?.avatar_url ? (
-                <img 
-                  src={profile.avatar_url} 
-                  alt={profile.nome} 
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <span className="material-symbols-outlined text-brand-bright">person</span>
-              )}
+              <span className="material-symbols-outlined text-brand-bright">analytics</span>
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold truncate text-white uppercase tracking-tight">
-                {profile?.nome || 'Usuário'}
+                Dashboard Público
               </p>
               <p className="text-[9px] text-brand-bright font-bold uppercase tracking-wider">
-                {profile?.cargo || 'Cargo'}
+                Análise de Crédito
               </p>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="text-gray-500 hover:text-brand-red transition-colors"
-              title="Sair"
-            >
-              <span className="material-symbols-outlined text-xl">logout</span>
-            </button>
           </div>
         </div>
       </aside>
