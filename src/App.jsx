@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { FilterProvider } from './contexts/FilterContext'
 
 // Auth Components
 import Login from './components/auth/Login'
@@ -33,67 +34,69 @@ function PlaceholderPage({ title }) {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
+      <FilterProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
-          {/* Protected Dashboard Routes */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<VisaoGeral />} />
-            <Route 
-              path="credito-risco" 
+            {/* Protected Dashboard Routes */}
+            <Route
+              path="/dashboard"
               element={
-                <ProtectedRoute requiredPermission="credito_risco">
-                  <CreditoRisco />
+                <ProtectedRoute>
+                  <DashboardLayout />
                 </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="financeiro" 
-              element={
-                <ProtectedRoute requiredPermission="financeiro">
-                  <PlaceholderPage title="Financeiro" />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="juridico" 
-              element={
-                <ProtectedRoute requiredPermission="juridico">
-                  <PlaceholderPage title="Jurídico" />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="bi" 
-              element={
-                <ProtectedRoute requiredPermission="bi">
-                  <BusinessIntelligence />
-                </ProtectedRoute>
-              } 
-            />
-            <Route path="parametros" element={<PlaceholderPage title="Parâmetros" />} />
-            <Route path="usuarios" element={<GerenciarUsuarios />} />
-            <Route path="perfis" element={<GerenciarPerfis />} />
-          </Route>
+              }
+            >
+              <Route index element={<VisaoGeral />} />
+              <Route 
+                path="credito-risco" 
+                element={
+                  <ProtectedRoute requiredPermission="credito_risco">
+                    <CreditoRisco />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="financeiro" 
+                element={
+                  <ProtectedRoute requiredPermission="financeiro">
+                    <PlaceholderPage title="Financeiro" />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="juridico" 
+                element={
+                  <ProtectedRoute requiredPermission="juridico">
+                    <PlaceholderPage title="Jurídico" />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="bi" 
+                element={
+                  <ProtectedRoute requiredPermission="bi">
+                    <BusinessIntelligence />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="parametros" element={<PlaceholderPage title="Parâmetros" />} />
+              <Route path="usuarios" element={<GerenciarUsuarios />} />
+              <Route path="perfis" element={<GerenciarPerfis />} />
+            </Route>
 
-          {/* Redirect root to dashboard or login */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
-          {/* 404 - Redirect to dashboard */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Redirect root to dashboard or login */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* 404 - Redirect to dashboard */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </FilterProvider>
     </AuthProvider>
   )
 }

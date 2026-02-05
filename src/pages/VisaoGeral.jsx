@@ -1,4 +1,6 @@
 import { useOutletContext } from 'react-router-dom'
+import { useFilters } from '../contexts/FilterContext'
+import { useContratoData } from '../hooks/useContratoData'
 import Header from '../components/layout/Header'
 import MetricCard from '../components/ui/MetricCard'
 import GaugeChart from '../components/ui/GaugeChart'
@@ -6,6 +8,44 @@ import ProgressBar from '../components/ui/ProgressBar'
 
 export default function VisaoGeral() {
   const { onMenuClick } = useOutletContext()
+  const { filters, updateFilter } = useFilters()
+  const { data, loading, error } = useContratoData()
+
+  // Função para formatar moeda
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(value || 0)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <svg className="animate-spin h-12 w-12 text-brand-bright" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-brand-bright text-sm font-bold">Carregando dados...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="glassmorphism rounded-2xl p-8 text-center max-w-md">
+          <span className="material-symbols-outlined text-brand-red text-5xl mb-4">error</span>
+          <h2 className="font-serif-authority text-xl text-white mb-2">Erro ao Carregar Dados</h2>
+          <p className="text-brand-bright/60 text-sm">{error}</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -23,21 +63,57 @@ export default function VisaoGeral() {
 
       {/* Filters */}
       <div className="px-4 md:px-8 py-4 flex flex-wrap gap-4 border-b border-brand-bright/10 bg-black/20">
-        <select className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer">
-          <option>Ano: 2023</option>
-          <option>Ano: 2022</option>
+        <select 
+          value={filters.year}
+          onChange={(e) => updateFilter('year', e.target.value)}
+          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
+        >
+          <option value="2023">Ano: 2023</option>
+          <option value="2022">Ano: 2022</option>
         </select>
-        <select className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer">
-          <option>Período: Outubro/2023</option>
+        <select 
+          value={filters.month}
+          onChange={(e) => updateFilter('month', e.target.value)}
+          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
+        >
+          <option value="todos">Mês: Todos</option>
+          <option value="1">Janeiro</option>
+          <option value="6">Junho</option>
+          <option value="7">Julho</option>
+          <option value="8">Agosto</option>
+          <option value="9">Setembro</option>
+          <option value="10">Outubro</option>
+          <option value="12">Dezembro</option>
         </select>
-        <select className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer">
-          <option>Gênero: Todos</option>
+        <select 
+          value={filters.gender}
+          onChange={(e) => updateFilter('gender', e.target.value)}
+          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
+        >
+          <option value="todos">Gênero: Todos</option>
+          <option value="M">Masculino</option>
+          <option value="F">Feminino</option>
         </select>
-        <select className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer">
-          <option>Tipo Contrato: Todos</option>
+        <select 
+          value={filters.contractType}
+          onChange={(e) => updateFilter('contractType', e.target.value)}
+          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
+        >
+          <option value="todos">Tipo Contrato: Todos</option>
+          <option value="Pessoal">Pessoal</option>
+          <option value="Imobiliário">Imobiliário</option>
+          <option value="Veicular">Veicular</option>
+          <option value="Empresarial">Empresarial</option>
         </select>
-        <select className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer">
-          <option>Faixa Etária: Todas</option>
+        <select 
+          value={filters.ageRange}
+          onChange={(e) => updateFilter('ageRange', e.target.value)}
+          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
+        >
+          <option value="todos">Faixa Etária: Todas</option>
+          <option value="18-30">18-30 anos</option>
+          <option value="31-50">31-50 anos</option>
+          <option value="50+">50+ anos</option>
         </select>
       </div>
 
@@ -48,26 +124,26 @@ export default function VisaoGeral() {
           <MetricCard
             icon="payments"
             label="Volume Total"
-            value="R$ 1.458.290.000"
-            change="+5.4%"
+            value={formatCurrency(data.totalVolume)}
+            change={`${data.taxaEficiencia.toFixed(1)}%`}
           />
           <MetricCard
             icon="sell"
             label="Ticket Médio"
-            value="R$ 124.500"
-            change="+2.1%"
+            value={formatCurrency(data.ticketMedio)}
+            change="Médio"
           />
           <MetricCard
             icon="description"
             label="Total de Contratos"
-            value="22.450"
-            change="14.201"
+            value={data.totalContratos.toString()}
+            change="Contratos"
           />
           <GaugeChart
             label="Inadimplência"
-            value={4.2}
-            max={8}
-            status="OK"
+            value={data.taxaInadimplencia}
+            max={10}
+            status={data.taxaInadimplencia < 5 ? 'OK' : 'ATENÇÃO'}
           />
         </div>
 
