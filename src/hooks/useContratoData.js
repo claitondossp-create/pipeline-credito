@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useFilters } from '../contexts/FilterContext'
 
@@ -8,11 +8,7 @@ export const useContratoData = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [filters]) // Re-fetch quando filtros mudarem
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -58,7 +54,11 @@ export const useContratoData = () => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters]) // Recria fetchData quando filters mudar
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData]) // Executa quando fetchData mudar
 
   const calculateMetrics = (contratos) => {
     if (!contratos || contratos.length === 0) {
