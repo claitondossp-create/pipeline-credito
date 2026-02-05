@@ -1,8 +1,10 @@
 import { useOutletContext } from 'react-router-dom'
+import { useFilters } from '../contexts/FilterContext'
 import Header from '../components/layout/Header'
 
 export default function CreditoRisco() {
   const { onMenuClick } = useOutletContext()
+  const { filters, updateFilter } = useFilters()
 
   const heatmapData = [
     { escolaridade: 'Ensino Superior', assalariado: 2.1, empresario: 4.5, autonomo: 3.2, pensionista: 1.8 },
@@ -33,13 +35,23 @@ export default function CreditoRisco() {
         onMenuClick={onMenuClick}
       >
         <div className="flex gap-2 flex-wrap">
-          <select className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright">
-            <option>FILTRO GLOBAL</option>
+          <select 
+            value={filters.year}
+            onChange={(e) => updateFilter('year', e.target.value)}
+            className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
+          >
+            <option value="2023">Ano: 2023</option>
+            <option value="2022">Ano: 2022</option>
           </select>
-          <select className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright">
-            <option>NÍVEL DE RISCO: TODOS</option>
-            <option>ALTO RISCO</option>
-            <option>MÉDIO RISCO</option>
+          <select 
+            value={filters.ageRange}
+            onChange={(e) => updateFilter('ageRange', e.target.value)}
+            className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
+          >
+            <option value="todos">NÍVEL DE RISCO: TODOS</option>
+            <option value="18-30">BAIXO RISCO (18-30)</option>
+            <option value="31-50">MÉDIO RISCO (31-50)</option>
+            <option value="50+">ALTO RISCO (50+)</option>
           </select>
         </div>
         <div className="flex gap-2 flex-wrap">

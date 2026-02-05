@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { useFilters } from '../contexts/FilterContext'
 import Header from '../components/layout/Header'
 
 export default function BusinessIntelligence() {
   const { onMenuClick } = useOutletContext()
+  const { filters, updateFilter } = useFilters()
   const [approvalIncrease, setApprovalIncrease] = useState(15)
 
   const channelEfficiency = [
@@ -46,11 +48,23 @@ export default function BusinessIntelligence() {
         onMenuClick={onMenuClick}
       >
         <div className="flex items-center gap-3 bg-brand-dark/10 p-1.5 rounded-xl border border-brand-bright/10">
-          <select className="bg-black/40 border-none text-[10px] rounded-lg pl-4 pr-10 py-2.5 font-bold text-brand-bright uppercase tracking-widest focus:ring-0">
-            <option>Canal: TODOS</option>
-            <option>Canal: PARCEIROS</option>
-            <option>Canal: DIRETO</option>
-            <option>Canal: INDICAÇÃO</option>
+          <select 
+            value={filters.year}
+            onChange={(e) => updateFilter('year', e.target.value)}
+            className="bg-black/40 border-none text-[10px] rounded-lg pl-4 pr-10 py-2.5 font-bold text-brand-bright uppercase tracking-widest focus:ring-0"
+          >
+            <option value="2023">Ano: 2023</option>
+            <option value="2022">Ano: 2022</option>
+          </select>
+          <select 
+            value={filters.contractType}
+            onChange={(e) => updateFilter('contractType', e.target.value)}
+            className="bg-black/40 border-none text-[10px] rounded-lg pl-4 pr-10 py-2.5 font-bold text-brand-bright uppercase tracking-widest focus:ring-0"
+          >
+            <option value="todos">Canal: TODOS</option>
+            <option value="Pessoal">Canal: PESSOAL</option>
+            <option value="Imobiliário">Canal: IMOBILIÁRIO</option>
+            <option value="Veicular">Canal: VEICULAR</option>
           </select>
           <div className="h-6 w-px bg-brand-bright/20"></div>
           <button className="flex items-center gap-2 bg-brand-bright/10 text-brand-bright px-5 py-2.5 rounded-lg text-[10px] font-bold hover:bg-brand-bright hover:text-black transition-all uppercase tracking-widest">
