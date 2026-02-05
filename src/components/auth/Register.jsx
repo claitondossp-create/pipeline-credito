@@ -48,10 +48,13 @@ export default function Register() {
       })
       setSuccess(true)
     } catch (err) {
+      console.error('Erro completo ao criar conta:', err)
       if (err.message.includes('already registered')) {
         setError('Este email já está cadastrado')
+      } else if (err.message.includes('User already registered')) {
+        setError('Este email já está cadastrado')
       } else {
-        setError('Erro ao criar conta. Tente novamente.')
+        setError(`Erro ao criar conta: ${err.message || 'Tente novamente.'}`)
       }
     } finally {
       setLoading(false)
