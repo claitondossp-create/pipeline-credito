@@ -36,3 +36,20 @@ lerna-debug.log*
 # Testing
 coverage
 *.local
+
+# Data files - CSVs grandes (>100MB) não devem ir para o Git
+*.csv
+*.xlsx
+*.xls
+
+# Scripts SQL gerados automaticamente
+scripts/*.sql
+scripts/import_*.sql
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+env/
+venv/
