@@ -5,6 +5,7 @@ import Header from '../components/layout/Header'
 import MetricCard from '../components/ui/MetricCard'
 import GaugeChart from '../components/ui/GaugeChart'
 import ProgressBar from '../components/ui/ProgressBar'
+import DebugPanel from '../components/ui/DebugPanel'
 
 export default function VisaoGeral() {
   const { onMenuClick } = useOutletContext()
@@ -239,6 +240,8 @@ export default function VisaoGeral() {
           </div>
         </div>
       </div>
+      
+      <DebugPanel />
     </>
   )
 }
