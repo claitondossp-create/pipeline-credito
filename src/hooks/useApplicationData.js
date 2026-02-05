@@ -1,16 +1,41 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useFilters } from '../contexts/FilterContext'
+import {
+  calculateVolume,
+  calculateTicketMedio,
+  countContratos,
+  calculateTaxaInadimplencia,
+  calculateTaxaEficiencia,
+  groupByField,
+  convertGroupToArray,
+  calculateAgeDistribution,
+  calculateTemporalEvolution,
+  calculateRecentRegistrationRisk,
+  calculateRiscoRelativo
+} from '../utils/calculations'
 
 /**
  * Hook para buscar dados reais de application_data
- * Compatible com os filtros existentes
+ * Com cálculos avançados traduzidos de DAX
  */
 export const useApplicationData = () => {
   const { filters } = useFilters()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [allData, setAllData] = useState([]) // Dados sem filtro para cálculos globais
+
+  // Buscar dados globais (uma vez)
+  useEffect(() => {
+    const fetchAllData = async () => {
+      const { data: all } = await supabase
+        .from('application_data')
+        .select('*')
+      if (all) setAllData(all)
+    }
+    fetchAllData()
+  }, [])
 
   const fetchData = useCallback(async () => {
     try {
@@ -33,7 +58,6 @@ export const useApplicationData = () => {
       // Filtro de mês
       if (filters.month && filters.month !== 'todos') {
         const month = parseInt(filters.month)
-        // Extrair mês da data usando função SQL
         query = query.filter('data_registro', 'gte', `${filters.year}-${String(month).padStart(2, '0')}-01`)
         query = query.filter('data_registro', 'lt', `${filters.year}-${String(month + 1).padStart(2, '0')}-01`)
       }
@@ -57,8 +81,8 @@ export const useApplicationData = () => {
 
       if (queryError) throw queryError
 
-      // Calcular métricas
-      const metrics = calculateMetrics(contratos || [])
+      // Calcular métricas usando biblioteca
+      const metrics = calculateMetrics(contratos || [], allData)
       setData(metrics)
 
     } catch (err) {
@@ -67,100 +91,76 @@ export const useApplicationData = () => {
     } finally {
       setLoading(false)
     }
-  }, [filters])
+  }, [filters, allData])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    if (allData.length > 0) {
+      fetchData()
+    }
+  }, [fetchData, allData])
 
-  const calculateMetrics = (contratos) => {
+  const calculateMetrics = (contratos, globalData) => {
     if (!contratos || contratos.length === 0) {
       return {
         totalVolume: 0,
+        totalSolicitado: 0,
         totalContratos: 0,
         ticketMedio: 0,
         taxaInadimplencia: 0,
-        taxaEficiencia: 100,
+        taxaEficiencia: 0,
+        riscoRelativo: 0,
+        riscoCadastroRecente: null,
         contratos: [],
         volumePorRenda: [],
         volumePorGenero: {},
-        contratosPorMes: [],
-        volumePorFaixaEtaria: []
+        volumePorFaixaEtaria: [],
+        contratosPorMes: []
       }
     }
 
-    const totalVolume = contratos.reduce((sum, c) => sum + parseFloat(c.valor_credito || 0), 0)
-    const totalContratos = contratos.length
-    const ticketMedio = totalContratos > 0 ? totalVolume / totalContratos : 0
+    // Métricas básicas usando biblioteca
+    const { totalVolume, totalSolicitado } = calculateVolume(contratos)
+    const totalContratos = countContratos(contratos)
+    const ticketMedio = calculateTicketMedio(contratos)
+    const taxaInadimplencia = calculateTaxaInadimplencia(contratos)
+    const taxaEficiencia = calculateTaxaEficiencia(contratos)
     
-    // Taxa de inadimplência baseada em alvo_inadimplencia
-    const inadimplentes = contratos.filter(c => c.alvo_inadimplencia === 1).length
-    const taxaInadimplencia = totalContratos > 0 ? (inadimplentes / totalContratos) * 100 : 0
-    
-    // Taxa de eficiência (sempre 100% pois esses são créditos concedidos)
-    const taxaEficiencia = 100
+    // Risco relativo (comparado com dados globais)
+    const riscoRelativo = globalData.length > 0 
+      ? calculateRiscoRelativo(contratos, globalData)
+      : 1
+
+    // Risco de cadastro recente
+    const riscoCadastroRecente = calculateRecentRegistrationRisk(contratos)
 
     // Volume por tipo de renda
-    const rendaGroups = contratos.reduce((acc, c) => {
-      const tipo = c.tipo_renda || 'Não informado'
-      if (!acc[tipo]) acc[tipo] = 0
-      acc[tipo] += parseFloat(c.valor_credito || 0)
-      return acc
-    }, {})
-    
-    const volumePorRenda = Object.entries(rendaGroups)
-      .map(([label, value]) => ({ label, value }))
-      .sort((a, b) => b.value - a.value)
+    const rendaGrouped = groupByField(contratos, 'tipo_renda')
+    const volumePorRenda = convertGroupToArray(rendaGrouped, 'value', true)
 
     // Volume por gênero
-    const volumePorGenero = contratos.reduce((acc, c) => {
-      const genero = c.genero || 'Não informado'
-      acc[genero] = (acc[genero] || 0) + parseFloat(c.valor_credito || 0)
-      return acc
-    }, {})
+    const generoGrouped = groupByField(contratos, 'genero')
+    const volumePorGenero = generoGrouped
 
-    // Volume por faixa etária
-    const faixaGroups = contratos.reduce((acc, c) => {
-      const faixa = c.faixa_etaria || 'Não informado'
-      if (!acc[faixa]) acc[faixa] = { total: 0, count: 0 }
-      acc[faixa].total += parseFloat(c.valor_credito || 0)
-      acc[faixa].count += 1
-      return acc
-    }, {})
+    // Distribuição por faixa etária (com ordenação correta)
+    const volumePorFaixaEtaria = calculateAgeDistribution(contratos)
 
-    const volumePorFaixaEtaria = Object.entries(faixaGroups)
-      .map(([label, data]) => ({ 
-        label, 
-        value: data.total,
-        count: data.count,
-        percentual: (data.count / totalContratos) * 100
-      }))
-      .sort((a, b) => b.value - a.value)
-
-    // Contratos por mês
-    const contratosPorMes = contratos.reduce((acc, c) => {
-      if (!c.data_registro) return acc
-      const data = new Date(c.data_registro)
-      const mes = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`
-      if (!acc[mes]) {
-        acc[mes] = { mes, volume: 0, quantidade: 0 }
-      }
-      acc[mes].volume += parseFloat(c.valor_credito || 0)
-      acc[mes].quantidade += 1
-      return acc
-    }, {})
+    // Evolução temporal
+    const contratosPorMes = calculateTemporalEvolution(contratos)
 
     return {
       totalVolume,
+      totalSolicitado,
       totalContratos,
       ticketMedio,
       taxaInadimplencia,
       taxaEficiencia,
+      riscoRelativo,
+      riscoCadastroRecente,
       contratos,
       volumePorRenda,
       volumePorGenero,
       volumePorFaixaEtaria,
-      contratosPorMes: Object.values(contratosPorMes).sort((a, b) => a.mes.localeCompare(b.mes))
+      contratosPorMes
     }
   }
 
