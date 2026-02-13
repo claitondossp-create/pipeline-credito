@@ -23,57 +23,67 @@ export const useRiskMetrics = () => {
       setLoading(true)
       setError(null)
 
-      // Construir query com filtros
-      let query = supabase
-        .from('application_data')
-        .select('*')
+      let allContratos = []
+      let page = 0
+      const pageSize = 1000
+      let hasMore = true
 
-      // Aplicar filtros (mesmo lógica do useApplicationData)
-      if (filters.year && filters.year !== 'todos') {
-        const year = parseInt(filters.year)
-        query = query
-          .gte('data_registro', `${year}-01-01`)
-          .lte('data_registro', `${year}-12-31`)
-      }
+      while (hasMore) {
+        const from = page * pageSize
+        const to = from + pageSize - 1
 
-      if (filters.month && filters.month !== 'todos' && filters.year && filters.year !== 'todos') {
-        const year = parseInt(filters.year)
-        const month = parseInt(filters.month)
-        
-        const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-        
-        // Lidar com virada de ano
-        let endYear = year
-        let endMonth = month + 1
-        
-        if (month === 12) {
-            endYear = year + 1
-            endMonth = 1
+        // Construir query base
+        let query = supabase
+          .from('application_data')
+          .select('*')
+          .range(from, to)
+
+        // Filtro de ano 
+        if (filters.year && filters.year !== 'todos') {
+          const year = parseInt(filters.year)
+          query = query
+            .gte('data_registro', `${year}-01-01`)
+            .lte('data_registro', `${year}-12-31`)
         }
-        
-        const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01`
 
-        query = query.gte('data_registro', startDate).lt('data_registro', endDate)
+        // Filtro de mês
+        if (filters.month && filters.month !== 'todos' && filters.year && filters.year !== 'todos') {
+          const year = parseInt(filters.year)
+          const month = parseInt(filters.month)
+          const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+          let endYear = year
+          let endMonth = month + 1
+          if (month === 12) {
+              endYear = year + 1
+              endMonth = 1
+          }
+          const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01`
+          query = query.gte('data_registro', startDate).lt('data_registro', endDate)
+        }
+
+        if (filters.gender && filters.gender !== 'todos') query = query.eq('genero', filters.gender)
+        if (filters.contractType && filters.contractType !== 'todos') query = query.eq('tipo_contrato', filters.contractType)
+        if (filters.ageRange && filters.ageRange !== 'todos') query = query.eq('faixa_etaria', filters.ageRange)
+
+
+        const { data: batch, error: queryError } = await query
+
+        if (queryError) throw queryError
+
+        if (batch) {
+          allContratos = [...allContratos, ...batch]
+          if (batch.length < pageSize) {
+            hasMore = false
+          } else {
+            page++
+          }
+        } else {
+          hasMore = false
+        }
       }
 
-      if (filters.gender && filters.gender !== 'todos') {
-        query = query.eq('genero', filters.gender)
-      }
-
-      if (filters.contractType && filters.contractType !== 'todos') {
-        query = query.eq('tipo_contrato', filters.contractType)
-      }
-
-      if (filters.ageRange && filters.ageRange !== 'todos') {
-        query = query.eq('faixa_etaria', filters.ageRange)
-      }
-
-      const { data: contratos, error: queryError } = await query
-
-      if (queryError) throw queryError
-
-      // Calcular métricas de risco
-      const metrics = calculateRiskMetrics(contratos || [])
+      // Calcular métricas de risco com TODOS os dados
+      const metrics = calculateRiskMetrics(allContratos)
       setData(metrics)
 
     } catch (err) {
