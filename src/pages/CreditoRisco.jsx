@@ -57,11 +57,11 @@ export default function CreditoRisco() {
             className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
           >
             <option value="todos">Idade: Todas</option>
-            <option value="<25"><25 anos</option>
+            <option value="&lt;25">&lt; 25 anos</option>
             <option value="25-35">25-35 anos</option>
             <option value="35-45">35-45 anos</option>
             <option value="45-60">45-60 anos</option>
-            <option value=">60">>60 anos</option>
+            <option value="&gt;60">&gt; 60 anos</option>
           </select>
         </div>
       </Header>
