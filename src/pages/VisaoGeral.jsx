@@ -4,6 +4,7 @@ import { useApplicationData } from '../hooks/useApplicationData'
 import Header from '../components/layout/Header'
 import MetricCard from '../components/ui/MetricCard'
 import { LineChart, PieChart, HorizontalBarChart } from '../components/charts'
+import { CONTRACT_TYPES, AGE_RANGES, YEARS, MONTHS } from '../utils/constants'
 
 export default function VisaoGeral() {
   const { onMenuClick } = useOutletContext()
@@ -85,8 +86,10 @@ export default function VisaoGeral() {
           onChange={(e) => updateFilter('year', e.target.value)}
           className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
         >
-          <option value="2023">Ano: 2023</option>
-          <option value="2022">Ano: 2022</option>
+          <option value="todos">Ano: Todos</option>
+          {YEARS.map(year => (
+            <option key={year} value={year}>Ano: {year}</option>
+          ))}
         </select>
         <select 
           value={filters.month}
@@ -94,13 +97,9 @@ export default function VisaoGeral() {
           className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
         >
           <option value="todos">Mês: Todos</option>
-          <option value="1">Janeiro</option>
-          <option value="6">Junho</option>
-          <option value="7">Julho</option>
-          <option value="8">Agosto</option>
-          <option value="9">Setembro</option>
-          <option value="10">Outubro</option>
-          <option value="12">Dezembro</option>
+          {MONTHS.map(m => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
         </select>
         <select 
           value={filters.gender}
@@ -117,10 +116,9 @@ export default function VisaoGeral() {
           className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
         >
           <option value="todos">Tipo Contrato: Todos</option>
-          <option value="Pessoal">Pessoal</option>
-          <option value="Imobiliário">Imobiliário</option>
-          <option value="Veicular">Veicular</option>
-          <option value="Empresarial">Empresarial</option>
+          {CONTRACT_TYPES.map(type => (
+            <option key={type.value} value={type.value}>{type.label}</option>
+          ))}
         </select>
         <select 
           value={filters.ageRange}
@@ -128,9 +126,9 @@ export default function VisaoGeral() {
           className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
         >
           <option value="todos">Faixa Etária: Todas</option>
-          <option value="18-30">18-30 anos</option>
-          <option value="31-50">31-50 anos</option>
-          <option value="50+">50+ anos</option>
+          {AGE_RANGES.map(range => (
+            <option key={range.value} value={range.value}>{range.label}</option>
+          ))}
         </select>
       </div>
 

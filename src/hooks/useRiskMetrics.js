@@ -36,10 +36,24 @@ export const useRiskMetrics = () => {
           .lte('data_registro', `${year}-12-31`)
       }
 
-      if (filters.month && filters.month !== 'todos') {
+      if (filters.month && filters.month !== 'todos' && filters.year && filters.year !== 'todos') {
+        const year = parseInt(filters.year)
         const month = parseInt(filters.month)
-        query = query.filter('data_registro', 'gte', `${filters.year}-${String(month).padStart(2, '0')}-01`)
-        query = query.filter('data_registro', 'lt', `${filters.year}-${String(month + 1).padStart(2, '0')}-01`)
+        
+        const startDate = `${year}-${String(month).padStart(2, '0')}-01`
+        
+        // Lidar com virada de ano
+        let endYear = year
+        let endMonth = month + 1
+        
+        if (month === 12) {
+            endYear = year + 1
+            endMonth = 1
+        }
+        
+        const endDate = `${endYear}-${String(endMonth).padStart(2, '0')}-01`
+
+        query = query.gte('data_registro', startDate).lt('data_registro', endDate)
       }
 
       if (filters.gender && filters.gender !== 'todos') {

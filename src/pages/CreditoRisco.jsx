@@ -3,6 +3,7 @@ import { useFilters } from '../contexts/FilterContext'
 import { useRiskMetrics } from '../hooks/useRiskMetrics'
 import Header from '../components/layout/Header'
 import { GaugeChart, Heatmap, HorizontalBarChart } from '../components/charts'
+import { AGE_RANGES, YEARS } from '../utils/constants'
 
 export default function CreditoRisco() {
   const { onMenuClick } = useOutletContext()
@@ -48,8 +49,10 @@ export default function CreditoRisco() {
             onChange={(e) => updateFilter('year', e.target.value)}
             className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
           >
-            <option value="2023">Ano: 2023</option>
-            <option value="2022">Ano: 2022</option>
+            <option value="todos">Ano: Todos</option>
+            {YEARS.map(year => (
+              <option key={year} value={year}>Ano: {year}</option>
+            ))}
           </select>
           <select 
             value={filters.ageRange}
@@ -57,11 +60,9 @@ export default function CreditoRisco() {
             className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
           >
             <option value="todos">Idade: Todas</option>
-            <option value="&lt;25">&lt; 25 anos</option>
-            <option value="25-35">25-35 anos</option>
-            <option value="35-45">35-45 anos</option>
-            <option value="45-60">45-60 anos</option>
-            <option value="&gt;60">&gt; 60 anos</option>
+            {AGE_RANGES.map(range => (
+              <option key={range.value} value={range.value}>{range.label}</option>
+            ))}
           </select>
         </div>
       </Header>
