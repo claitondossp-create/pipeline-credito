@@ -4,7 +4,8 @@ import { useApplicationData } from '../hooks/useApplicationData'
 import Header from '../components/layout/Header'
 import MetricCard from '../components/ui/MetricCard'
 import { LineChart, PieChart, HorizontalBarChart } from '../components/charts'
-import { CONTRACT_TYPES, AGE_RANGES, YEARS, MONTHS } from '../utils/constants'
+import { CONTRACT_TYPES, AGE_RANGES, MONTHS } from '../utils/constants'
+import YearSlider from '../components/ui/YearSlider'
 
 export default function VisaoGeral() {
   const { onMenuClick } = useOutletContext()
@@ -79,18 +80,22 @@ export default function VisaoGeral() {
         </div>
       </Header>
 
+
+
       {/* Filters */}
-      <div className="px-4 md:px-8 py-4 flex flex-wrap gap-4 border-b border-brand-bright/10 bg-black/20">
-        <select 
-          value={filters.year}
-          onChange={(e) => updateFilter('year', e.target.value)}
-          className="bg-transparent border-none text-[10px] font-bold text-brand-bright uppercase tracking-widest focus:ring-0 cursor-pointer"
-        >
-          <option value="todos">Ano: Todos</option>
-          {YEARS.map(year => (
-            <option key={year} value={year}>Ano: {year}</option>
-          ))}
-        </select>
+      <div className="px-4 md:px-8 py-4 flex flex-wrap gap-6 border-b border-brand-bright/10 bg-black/20 items-end">
+        
+        {/* Year Slider replaces Select */}
+        <div className="w-full max-w-xs md:max-w-md pb-2">
+            <YearSlider 
+                selectedYear={filters.year} 
+                onChange={(y) => updateFilter('year', y)}
+                minYear={1979}
+                maxYear={2023}
+            />
+        </div>
+
+        {/* Other Filters */}
         <select 
           value={filters.month}
           onChange={(e) => updateFilter('month', e.target.value)}

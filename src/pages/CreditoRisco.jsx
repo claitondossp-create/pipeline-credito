@@ -3,7 +3,8 @@ import { useFilters } from '../contexts/FilterContext'
 import { useRiskMetrics } from '../hooks/useRiskMetrics'
 import Header from '../components/layout/Header'
 import { GaugeChart, Heatmap, HorizontalBarChart } from '../components/charts'
-import { AGE_RANGES, YEARS } from '../utils/constants'
+import { AGE_RANGES } from '../utils/constants'
+import YearSlider from '../components/ui/YearSlider'
 
 export default function CreditoRisco() {
   const { onMenuClick } = useOutletContext()
@@ -43,17 +44,16 @@ export default function CreditoRisco() {
         subtitle="Análise de Inadimplência"
         onMenuClick={onMenuClick}
       >
-        <div className="flex gap-2 flex-wrap">
-          <select 
-            value={filters.year}
-            onChange={(e) => updateFilter('year', e.target.value)}
-            className="bg-brand-dark/30 border border-brand-bright/20 text-[10px] rounded px-3 py-1 text-brand-bright/80 uppercase tracking-widest focus:ring-brand-bright"
-          >
-            <option value="todos">Ano: Todos</option>
-            {YEARS.map(year => (
-              <option key={year} value={year}>Ano: {year}</option>
-            ))}
-          </select>
+        <div className="flex flex-col md:flex-row gap-6 items-end w-full max-w-3xl justify-end">
+          <div className="w-full max-w-xs pb-1">
+             <YearSlider 
+                selectedYear={filters.year} 
+                onChange={(y) => updateFilter('year', y)}
+                minYear={1979}
+                maxYear={2023}
+            />
+          </div>
+
           <select 
             value={filters.ageRange}
             onChange={(e) => updateFilter('ageRange', e.target.value)}
