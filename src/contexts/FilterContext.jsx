@@ -12,8 +12,8 @@ export const useFilters = () => {
 
 export const FilterProvider = ({ children }) => {
   const [filters, setFilters] = useState({
-    year: 'todos',
-    month: 'todos',
+    year: '2023',
+    month: '12',
     gender: 'todos',
     contractType: 'todos',
     ageRange: 'todos',
@@ -26,12 +26,12 @@ export const FilterProvider = ({ children }) => {
 
   const clearFilters = () => {
     setFilters({
+      period: 'mensal',
       year: '2023',
-      month: 'todos',
+      month: '12',
       gender: 'todos',
       contractType: 'todos',
-      ageRange: 'todos',
-      period: 'mensal',
+      ageRange: 'todos'
     })
   }
 
