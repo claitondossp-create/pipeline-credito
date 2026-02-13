@@ -12,7 +12,7 @@ export const useFilters = () => {
 
 export const FilterProvider = ({ children }) => {
   const [filters, setFilters] = useState({
-    year: '2023',
+    year: 'todos',
     month: 'todos',
     gender: 'todos',
     contractType: 'todos',
